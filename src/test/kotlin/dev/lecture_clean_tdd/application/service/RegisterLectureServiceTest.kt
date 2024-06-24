@@ -49,7 +49,6 @@ class RegisterLectureServiceTest {
 
         val user = User("변주환")
 
-        // TODO 좀더 디테일하게 테스트 작성 (verify 도 가능하면 작성)
         `when`(userRepository.findById(request.userId)).thenReturn(user)
         `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
 
@@ -93,7 +92,6 @@ class RegisterLectureServiceTest {
         val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
         val user = User("변주환")
 
-        // TODO 좀더 디테일하게 테스트 작성 (verify 도 가능하면 작성)
         `when`(userRepository.findById(request.userId)).thenReturn(user)
         `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
 
