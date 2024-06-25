@@ -9,19 +9,23 @@ import dev.lecture_clean_tdd.Exception.UserNotFoundException
 import dev.lecture_clean_tdd.domain.entity.Lecture
 import dev.lecture_clean_tdd.application.port.output.LectureRepository
 import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
+import dev.lecture_clean_tdd.application.event.dto.LectureHistoryEvent
 import dev.lecture_clean_tdd.application.port.output.LectureAttendeeRepository
+import dev.lecture_clean_tdd.application.port.output.LectureHistoryRepository
 import dev.lecture_clean_tdd.application.port.output.UserRepository
 import dev.lecture_clean_tdd.domain.entity.LectureAttendee
 import dev.lecture_clean_tdd.domain.entity.User
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.any
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
+import org.springframework.context.ApplicationEventPublisher
 
 @ExtendWith(MockitoExtension::class)
 class RegisterLectureServiceTest {
@@ -35,9 +39,11 @@ class RegisterLectureServiceTest {
     @Mock
     lateinit var lectureAttendeeRepository: LectureAttendeeRepository
 
+    @Mock
+    lateinit var eventPublisher: ApplicationEventPublisher
+
     @InjectMocks
     lateinit var registerLectureService: RegisterLectureService
-
 
     @Test
     fun `특강을 신청하면 성공한다`() {
@@ -171,5 +177,25 @@ class RegisterLectureServiceTest {
         assertThatThrownBy {
             registerLectureService.registerLecture(request)
         }.isInstanceOf(LateLectureRegistrationException::class.java)
+    }
+
+    @Test
+    fun `특강 신청시 어떤 유저가 신청했는지 History 를 저장하는 이벤트가 발행된다`() {
+        // given
+        val userId = 1L
+        val lectureId = 1L
+        val request = LectureRequestDto(userId, lectureId)
+
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 15:00", "2025-01-01 13:00")
+        val user = User("변주환")
+
+        // when
+        `when`(userRepository.findById(request.userId)).thenReturn(user)
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
+
+        registerLectureService.registerLecture(request)
+
+        //then
+        verify(eventPublisher, times(1)).publishEvent(any(LectureHistoryEvent::class.java))
     }
 }
