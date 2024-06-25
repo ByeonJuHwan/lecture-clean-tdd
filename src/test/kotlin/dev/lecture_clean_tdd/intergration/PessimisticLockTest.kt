@@ -5,6 +5,7 @@ import dev.lecture_clean_tdd.adapter.persistence.jpa.JpaLectureRepository
 import dev.lecture_clean_tdd.adapter.persistence.jpa.JpaUserRepository
 import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
 import dev.lecture_clean_tdd.application.port.output.LectureAttendeeRepository
+import dev.lecture_clean_tdd.application.port.output.LectureHistoryRepository
 import dev.lecture_clean_tdd.application.port.output.LectureRepository
 import dev.lecture_clean_tdd.application.port.output.UserRepository
 import dev.lecture_clean_tdd.application.service.RegisterLectureService
@@ -36,6 +37,9 @@ class PessimisticLockTest {
 
     @Autowired
     private lateinit var lectureAttendeeRepository: LectureAttendeeRepository
+
+    @Autowired
+    private lateinit var lectureHistoryRepository: LectureHistoryRepository
 
     @Autowired
     private lateinit var registerLectureService: RegisterLectureService
@@ -121,7 +125,7 @@ class PessimisticLockTest {
     }
 
     @Test
-    fun `100명이 동시에 신청을 했을 경우 30개의 이력이 쌓여야한다`() {
+    fun `100명이 동시에 신청을 했을 경우 30명의 성공이력이 쌓여야한다`() {
         // given
         val threadCount = 100
         val executorService = Executors.newFixedThreadPool(32)
@@ -149,5 +153,38 @@ class PessimisticLockTest {
 
         // then
         assertThat(lectureAttendees).isEqualTo(30)
+    }
+
+    @Test
+    fun `동시에 100명이 요청했을때 100명의 history가 쌓이고 30명만 신청에 성공한다`() {
+        // given
+        val threadCount = 100
+        val executorService = Executors.newFixedThreadPool(32)
+        val latch = CountDownLatch(threadCount)
+        val lectureId = 1L
+        val users = jpaUserRepository.findAll()
+
+        for (i in 0 until threadCount) {
+            executorService.submit {
+                try {
+                    val request = LectureRequestDto(users[i].id, lectureId)
+                    registerLectureService.registerLecture(request)
+                } finally {
+                    latch.countDown()
+                }
+            }
+        }
+
+        latch.await()
+        executorService.shutdown()
+
+        // when
+        val lecture = lectureRepository.findById(lectureId) ?: throw LectureNotFoundException("강의가 없습니다")
+        val lectureAttendees = lectureAttendeeRepository.countByLecture(lecture)
+        val lectureHistories = lectureHistoryRepository.countByLecture(lecture)
+
+        // then
+        assertThat(lectureAttendees).isEqualTo(30)
+        assertThat(lectureHistories).isEqualTo(100)
     }
 }
