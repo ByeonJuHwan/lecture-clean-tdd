@@ -6,14 +6,13 @@ import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
 import dev.lecture_clean_tdd.adapter.web.response.LectureDto
 import dev.lecture_clean_tdd.adapter.web.response.LectureListResponse
 import dev.lecture_clean_tdd.application.port.input.GetLecturesUseCase
+import dev.lecture_clean_tdd.application.port.input.LectureStatusUseCase
 import dev.lecture_clean_tdd.application.service.RegisterLectureService
-import dev.lecture_clean_tdd.domain.entity.Lecture
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.mockito.BDDMockito.given
-import org.mockito.Mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -31,11 +30,15 @@ class LectureControllerTest @Autowired constructor(
     private val objectMapper: ObjectMapper,
 ){
 
+    //TODO interface 로 변경
     @MockBean
     private lateinit var registerLectureService : RegisterLectureService
 
     @MockBean
     private lateinit var getLecturesUseCase: GetLecturesUseCase
+
+    @MockBean
+    private lateinit var lectureStatusUseCase: LectureStatusUseCase
 
     @Nested
     @DisplayName("[저장] 특강 신청 컨트롤러 테스트")
@@ -97,5 +100,39 @@ class LectureControllerTest @Autowired constructor(
         }
     }
 
+    @Nested
+    @DisplayName("[조회] 특강 신청 성공 조회 컨트롤러 테스트")
+    inner class LectureStatusControllerTests {
 
+        @Test
+        fun `특정유저가 특강신청 성공시 200 코드와 함께 true 를 반환한다`() {
+            val result = true
+            val userId = 1L
+            val lectureId = 1L
+
+            given(lectureStatusUseCase.isLectureRegistered(userId, lectureId)).willReturn(result)
+
+            mockMvc.perform(get("/lectures/{userId}/applications/{lectureId}", userId, lectureId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("\$").value(result))
+        }
+
+        @Test
+        fun `특정유저가 특강신청 실패시 200 코드와 함께 false 를 반환한다`() {
+
+            val result = false
+            val userId = 1L
+            val lectureId = 1L
+
+            given(lectureStatusUseCase.isLectureRegistered(userId, lectureId)).willReturn(result)
+
+            mockMvc.perform(get("/lectures/{userId}/applications/{lectureId}", userId, lectureId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("\$").value(result))
+        }
+    }
 }
