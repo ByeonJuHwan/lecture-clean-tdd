@@ -9,9 +9,8 @@ import dev.lecture_clean_tdd.Exception.UserNotFoundException
 import dev.lecture_clean_tdd.domain.entity.Lecture
 import dev.lecture_clean_tdd.application.port.output.LectureRepository
 import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
-import dev.lecture_clean_tdd.application.event.dto.LectureHistoryEvent
+import dev.lecture_clean_tdd.application.listener.event.LectureHistoryEvent
 import dev.lecture_clean_tdd.application.port.output.LectureAttendeeRepository
-import dev.lecture_clean_tdd.application.port.output.LectureHistoryRepository
 import dev.lecture_clean_tdd.application.port.output.UserRepository
 import dev.lecture_clean_tdd.domain.entity.LectureAttendee
 import dev.lecture_clean_tdd.domain.entity.User
