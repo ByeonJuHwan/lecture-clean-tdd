@@ -1,4 +1,4 @@
-package dev.lecture_clean_tdd.application.event.dto
+package dev.lecture_clean_tdd.application.listener.event
 
 import dev.lecture_clean_tdd.domain.entity.Lecture
 import dev.lecture_clean_tdd.domain.entity.User

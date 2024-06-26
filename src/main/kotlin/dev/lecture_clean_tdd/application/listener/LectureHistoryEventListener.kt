@@ -1,6 +1,6 @@
-package dev.lecture_clean_tdd.application.event
+package dev.lecture_clean_tdd.application.listener
 
-import dev.lecture_clean_tdd.application.event.dto.LectureHistoryEvent
+import dev.lecture_clean_tdd.application.listener.event.LectureHistoryEvent
 import dev.lecture_clean_tdd.application.port.output.LectureHistoryRepository
 import dev.lecture_clean_tdd.domain.entity.LectureApplicationHistory
 import org.slf4j.LoggerFactory

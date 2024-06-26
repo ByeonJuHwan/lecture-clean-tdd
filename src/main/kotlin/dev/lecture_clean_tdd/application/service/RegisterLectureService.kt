@@ -7,7 +7,7 @@ import dev.lecture_clean_tdd.Exception.LectureNotFoundException
 import dev.lecture_clean_tdd.Exception.MaxAttendeesReachedException
 import dev.lecture_clean_tdd.Exception.UserNotFoundException
 import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
-import dev.lecture_clean_tdd.application.event.dto.LectureHistoryEvent
+import dev.lecture_clean_tdd.application.listener.event.LectureHistoryEvent
 import dev.lecture_clean_tdd.application.port.input.RegisterLectureUseCase
 import dev.lecture_clean_tdd.application.port.output.LectureAttendeeRepository
 import dev.lecture_clean_tdd.application.port.output.LectureRepository
