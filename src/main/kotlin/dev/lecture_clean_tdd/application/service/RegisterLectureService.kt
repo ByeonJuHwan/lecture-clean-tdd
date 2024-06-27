@@ -47,9 +47,9 @@ class RegisterLectureService(
         return userRepository.findById(userId) ?: throw UserNotFoundException("유저를 찾을 수 없습니다")
     }
 
-    private fun getLecture(lectureId: Long): Lecture {
-        return lectureRepository.findByIdWithLock(lectureId) ?: throw LectureNotFoundException("강의를 찾을 수 없습니다")
-    }
+    private fun getLecture(lectureId: Long): Lecture { 
+        return lectureRepository.findByIdWithLock(lectureId) ?: throw LectureNotFoundException("강의를 찾을 수 없습니다") 
+    } 
 
     private fun ensureUniqueRegistration(user: User, lecture: Lecture) {
         lectureAttendeeRepository.findByUserAndLecture(user, lecture)?.let {
