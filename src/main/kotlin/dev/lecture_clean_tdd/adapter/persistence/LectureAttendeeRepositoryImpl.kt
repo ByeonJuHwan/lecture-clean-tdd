@@ -14,11 +14,11 @@ class LectureAttendeeRepositoryImpl(
     override fun save(lectureAttendee: LectureAttendee): LectureAttendee {
         return jpaLectureAttendeeRepository.save(lectureAttendee)
     }
-
-    override fun findByUserAndLecture(user: User, lecture: Lecture): LectureAttendee? {
-        return jpaLectureAttendeeRepository.findByUserAndLecture(user, lecture)
-    }
-
+ 
+    override fun findByUserAndLecture(user: User, lecture: Lecture): LectureAttendee? { 
+        return jpaLectureAttendeeRepository.findByUserAndLecture(user, lecture) 
+    } 
+ 
     override fun countByLecture(lecture: Lecture): Long {
         return jpaLectureAttendeeRepository.countByLecture(lecture)
     }
