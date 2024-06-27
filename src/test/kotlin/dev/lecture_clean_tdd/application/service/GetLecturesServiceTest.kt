@@ -33,7 +33,7 @@ class GetLecturesServiceTest {
         val allLectures = getLectureService.getAllLectures()
 
         //then
-        assertThat(allLectures.lectures.size).isEqualTo(1)
-        assertThat(allLectures.lectures[0].title).isEqualTo("테스트")
+        assertThat(allLectures.size).isEqualTo(1)
+        assertThat(allLectures[0].title).isEqualTo("테스트")
     }
 }

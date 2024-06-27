@@ -1,7 +1,7 @@
 package dev.lecture_clean_tdd.application.port.input
 
-import dev.lecture_clean_tdd.adapter.web.response.LectureListResponse
+import dev.lecture_clean_tdd.application.service.dto.LectureDto
 
 interface GetLecturesUseCase {
-    fun getAllLectures(): LectureListResponse
+    fun getAllLectures(): List<LectureDto>
 }

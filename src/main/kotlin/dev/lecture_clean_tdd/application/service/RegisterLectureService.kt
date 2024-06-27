@@ -6,12 +6,12 @@ import dev.lecture_clean_tdd.Exception.LateLectureRegistrationException
 import dev.lecture_clean_tdd.Exception.LectureNotFoundException
 import dev.lecture_clean_tdd.Exception.MaxAttendeesReachedException
 import dev.lecture_clean_tdd.Exception.UserNotFoundException
-import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
 import dev.lecture_clean_tdd.application.listener.event.LectureHistoryEvent
 import dev.lecture_clean_tdd.application.port.input.RegisterLectureUseCase
 import dev.lecture_clean_tdd.application.port.output.LectureAttendeeRepository
 import dev.lecture_clean_tdd.application.port.output.LectureRepository
 import dev.lecture_clean_tdd.application.port.output.UserRepository
+import dev.lecture_clean_tdd.application.service.dto.LectureRegistryDto
 import dev.lecture_clean_tdd.domain.entity.Lecture
 import dev.lecture_clean_tdd.domain.entity.LectureAttendee
 import dev.lecture_clean_tdd.domain.entity.User
@@ -29,7 +29,7 @@ class RegisterLectureService(
 ) : RegisterLectureUseCase{
 
     @Transactional
-    override fun registerLecture(request: LectureRequestDto): Boolean {
+    override fun registerLecture(request: LectureRegistryDto): Boolean {
         val user = getUser(request.userId)
         val lecture = getLecture(request.lectureId)
 
