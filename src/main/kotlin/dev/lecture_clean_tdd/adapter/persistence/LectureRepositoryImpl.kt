@@ -23,8 +23,8 @@ class LectureRepositoryImpl(
     override fun findByIdWithLock(lectureId: Long): Lecture? {
         return jpaLectureRepository.findByIdWithLock(lectureId)
     }
-
-    override fun findAll(): List<Lecture> {
-        return jpaLectureRepository.findAll()
-    }
-}
+ 
+    override fun findAll(): List<Lecture> { 
+        return jpaLectureRepository.findAll() 
+    } 
+} 
