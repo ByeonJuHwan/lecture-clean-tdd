@@ -40,7 +40,7 @@ class LectureStatusServiceTest {
         val lectureAttendee = LectureAttendee(user, lecture)
 
         `when`(userRepository.findById(userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(lectureId)).thenReturn(lecture)
+        `when`(lectureRepository.findById(lectureId)).thenReturn(lecture)
         `when`(lectureAttendeeRepository.findByUserAndLecture(user, lecture)).thenReturn(lectureAttendee)
         val isRegistered = lectureStatusService.isLectureRegistered(userId, lectureId)
 
@@ -55,7 +55,7 @@ class LectureStatusServiceTest {
         val user = User("변주환")
 
         `when`(userRepository.findById(userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(lectureId)).thenReturn(lecture)
+        `when`(lectureRepository.findById(lectureId)).thenReturn(lecture)
         `when`(lectureAttendeeRepository.findByUserAndLecture(user, lecture)).thenReturn(null)
         val isRegistered = lectureStatusService.isLectureRegistered(userId, lectureId)
 

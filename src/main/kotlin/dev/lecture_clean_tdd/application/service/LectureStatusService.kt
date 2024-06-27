@@ -30,6 +30,6 @@ class LectureStatusService (
     }
 
     private fun getLecture(lectureId: Long): Lecture {
-        return lectureRepository.findByIdWithLock(lectureId) ?: throw LectureNotFoundException("강의를 찾을 수 없습니다")
+        return lectureRepository.findById(lectureId) ?: throw LectureNotFoundException("강의를 찾을 수 없습니다")
     }
 }
