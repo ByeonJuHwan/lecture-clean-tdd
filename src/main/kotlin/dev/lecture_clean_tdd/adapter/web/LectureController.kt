@@ -35,12 +35,12 @@ class LectureController(
     fun getLectures() :  ResponseEntity<LectureListResponse>{
         return ResponseEntity.ok(LectureListResponse(getLecturesUseCase.getAllLectures()))
     }
-
-    @GetMapping("/lectures/{lectureId}/applications/{userId}")
-    fun checkLectureApplicationStatus(
-        @PathVariable lectureId: Long,
-        @PathVariable userId: Long
-    ): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(lectureStatusUseCase.isLectureRegistered(userId, lectureId))
-    }
+ 
+    @GetMapping("/lectures/{lectureId}/applications/{userId}") 
+    fun checkLectureApplicationStatus( 
+        @PathVariable lectureId: Long, 
+        @PathVariable userId: Long 
+    ): ResponseEntity<Boolean> { 
+        return ResponseEntity.ok(lectureStatusUseCase.isLectureRegistered(userId, lectureId)) 
+    } 
 }
