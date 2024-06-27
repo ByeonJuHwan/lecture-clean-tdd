@@ -2,12 +2,13 @@ package dev.lecture_clean_tdd.presentation.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.lecture_clean_tdd.adapter.web.LectureController
-import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
-import dev.lecture_clean_tdd.adapter.web.response.LectureDto
+import dev.lecture_clean_tdd.adapter.web.request.LectureRequest
+import dev.lecture_clean_tdd.adapter.web.request.toDto
 import dev.lecture_clean_tdd.adapter.web.response.LectureListResponse
 import dev.lecture_clean_tdd.application.port.input.GetLecturesUseCase
 import dev.lecture_clean_tdd.application.port.input.LectureStatusUseCase
-import dev.lecture_clean_tdd.application.service.RegisterLectureService
+import dev.lecture_clean_tdd.application.port.input.RegisterLectureUseCase
+import dev.lecture_clean_tdd.application.service.dto.LectureDto
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.DisplayName
@@ -30,9 +31,8 @@ class LectureControllerTest @Autowired constructor(
     private val objectMapper: ObjectMapper,
 ){
 
-    //TODO interface 로 변경
     @MockBean
-    private lateinit var registerLectureService : RegisterLectureService
+    private lateinit var registerLectureUseCase : RegisterLectureUseCase
 
     @MockBean
     private lateinit var getLecturesUseCase: GetLecturesUseCase
@@ -49,9 +49,9 @@ class LectureControllerTest @Autowired constructor(
             val userId = 1L
             val lectureId = 1L
             val registrationResult = true
-            val request = LectureRequestDto(userId, lectureId)
+            val request = LectureRequest(userId, lectureId)
 
-            given(registerLectureService.registerLecture(request)).willReturn(registrationResult)
+            given(registerLectureUseCase.registerLecture(request.toDto())).willReturn(registrationResult)
 
             mockMvc.perform(post("/lectures/apply")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +90,7 @@ class LectureControllerTest @Autowired constructor(
             )
             val lectureResponse = LectureListResponse(lectures)
 
-            given(getLecturesUseCase.getAllLectures()).willReturn(lectureResponse)
+            given(getLecturesUseCase.getAllLectures()).willReturn(lectures)
 
             mockMvc.perform(get("/lectures")
                 .contentType(MediaType.APPLICATION_JSON))

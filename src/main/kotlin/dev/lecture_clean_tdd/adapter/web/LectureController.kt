@@ -1,6 +1,7 @@
 package dev.lecture_clean_tdd.adapter.web
 
-import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
+import dev.lecture_clean_tdd.adapter.web.request.LectureRequest
+import dev.lecture_clean_tdd.adapter.web.request.toDto
 import dev.lecture_clean_tdd.adapter.web.response.LectureListResponse
 import dev.lecture_clean_tdd.application.port.input.GetLecturesUseCase
 import dev.lecture_clean_tdd.application.port.input.LectureStatusUseCase
@@ -25,14 +26,14 @@ class LectureController(
 
     @PostMapping("/lectures/apply")
     fun registerLecture(
-        @RequestBody request: LectureRequestDto,
+        @RequestBody request: LectureRequest,
     ): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(registerLectureUseCase.registerLecture(request))
+        return ResponseEntity.ok(registerLectureUseCase.registerLecture(request.toDto()))
     }
 
     @GetMapping("/lectures")
     fun getLectures() :  ResponseEntity<LectureListResponse>{
-        return ResponseEntity.ok(getLecturesUseCase.getAllLectures())
+        return ResponseEntity.ok(LectureListResponse(getLecturesUseCase.getAllLectures()))
     }
 
     @GetMapping("/lectures/{lectureId}/applications/{userId}")

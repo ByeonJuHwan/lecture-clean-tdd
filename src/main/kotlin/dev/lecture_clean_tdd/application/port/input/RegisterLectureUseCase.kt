@@ -1,7 +1,7 @@
 package dev.lecture_clean_tdd.application.port.input
 
-import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
+import dev.lecture_clean_tdd.application.service.dto.LectureRegistryDto
 
 interface RegisterLectureUseCase {
-    fun registerLecture(request : LectureRequestDto) : Boolean
+    fun registerLecture(request : LectureRegistryDto) : Boolean
 }

@@ -3,7 +3,8 @@ package dev.lecture_clean_tdd.intergration
 import dev.lecture_clean_tdd.Exception.LectureNotFoundException
 import dev.lecture_clean_tdd.adapter.persistence.jpa.JpaLectureRepository
 import dev.lecture_clean_tdd.adapter.persistence.jpa.JpaUserRepository
-import dev.lecture_clean_tdd.adapter.web.request.LectureRequestDto
+import dev.lecture_clean_tdd.adapter.web.request.LectureRequest
+import dev.lecture_clean_tdd.adapter.web.request.toDto
 import dev.lecture_clean_tdd.application.port.output.LectureAttendeeRepository
 import dev.lecture_clean_tdd.application.port.output.LectureHistoryRepository
 import dev.lecture_clean_tdd.application.port.output.LectureRepository
@@ -60,8 +61,8 @@ class PessimisticLockTest {
 
     @Test
     fun `1개의 수강신청 요청이 들어왔을때 정상적으로 정원이 1명 증가하는지 확인`() {
-        val request = LectureRequestDto(1L, 1L)
-        val result = registerLectureService.registerLecture(request)
+        val request = LectureRequest(1L, 1L)
+        val result = registerLectureService.registerLecture(request.toDto())
 
         assertThat(result).isTrue()
 
@@ -73,20 +74,20 @@ class PessimisticLockTest {
     @Test
     fun `3명이 동시에 수강신청을 했을 경우 정상적으로 현재 신청인원이 3명이 된다`() {
         // given
-        val request1 = LectureRequestDto(1L,1L)
-        val request2 = LectureRequestDto(2L,1L)
-        val request3 = LectureRequestDto(3L,1L)
+        val request1 = LectureRequest(1L,1L)
+        val request2 = LectureRequest(2L,1L)
+        val request3 = LectureRequest(3L,1L)
 
         // when
         CompletableFuture.allOf(
             CompletableFuture.runAsync{
-                registerLectureService.registerLecture(request1)
+                registerLectureService.registerLecture(request1.toDto())
             },
             CompletableFuture.runAsync{
-                registerLectureService.registerLecture(request2)
+                registerLectureService.registerLecture(request2.toDto())
             },
             CompletableFuture.runAsync{
-                registerLectureService.registerLecture(request3)
+                registerLectureService.registerLecture(request3.toDto())
             },
         ).join() // 제일 오래 끝나는거 끝날떄까지 기다려줌. = 내가 비동기/병렬로 실행한 함수가 전부 끝남을 보장.
 
@@ -108,8 +109,8 @@ class PessimisticLockTest {
         for (i in 0 until threadCount) {
             executorService.submit {
                 try {
-                    val request = LectureRequestDto(users[i].id, lectureId)
-                    registerLectureService.registerLecture(request)
+                    val request = LectureRequest(users[i].id, lectureId)
+                    registerLectureService.registerLecture(request.toDto())
                 } finally {
                     latch.countDown()
                 }
@@ -136,8 +137,8 @@ class PessimisticLockTest {
         for (i in 0 until threadCount) {
             executorService.submit {
                 try {
-                    val request = LectureRequestDto(users[i].id, lectureId)
-                    registerLectureService.registerLecture(request)
+                    val request = LectureRequest(users[i].id, lectureId)
+                    registerLectureService.registerLecture(request.toDto())
                 } finally {
                     latch.countDown()
                 }
@@ -167,8 +168,8 @@ class PessimisticLockTest {
         for (i in 0 until threadCount) {
             executorService.submit {
                 try {
-                    val request = LectureRequestDto(users[i].id, lectureId)
-                    registerLectureService.registerLecture(request)
+                    val request = LectureRequest(users[i].id, lectureId)
+                    registerLectureService.registerLecture(request.toDto())
                 } finally {
                     latch.countDown()
                 }
