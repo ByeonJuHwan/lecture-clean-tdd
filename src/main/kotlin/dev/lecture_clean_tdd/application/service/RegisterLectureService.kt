@@ -25,7 +25,7 @@ class RegisterLectureService(
     private val lectureRepository: LectureRepository, 
     private val userRepository : UserRepository, 
     private val lectureAttendeeRepository: LectureAttendeeRepository, 
-    private val eventPublisher: ApplicationEventPublisher, 
+    private val LectureRegisteredEvent: ApplicationEventPublisher,
 ) : RegisterLectureUseCase{ 
  
     @Transactional 
@@ -61,8 +61,8 @@ class RegisterLectureService(
      * 비동기로 처리해서 아래 로직에서 예외가 발생해도 rollback 이 되자 않고 history 는 저장되도록 처리 
      * 비동기 같은 경우 스프링 AOP 를 사용해서 private 메소드에는 접근이 불가능하므로 접근제한자를 변경 
      */ 
-    protected fun saveLectureApplicationHistory(user: User, lecture: Lecture) { 
-        eventPublisher.publishEvent(LectureHistoryEvent(user, lecture)) 
+    protected fun saveLectureApplicationHistory(user: User, lecture: Lecture) {
+        LectureRegisteredEvent.publishEvent(LectureHistoryEvent(user, lecture))
     } 
  
     private fun validateLectureRegistrationDate(registrationStartDate: String, registrationEndDate: String) { 
