@@ -31,34 +31,34 @@ class LectureStatusServiceTest {
     @InjectMocks
     private lateinit var lectureStatusService: LectureStatusService
 
-    @Test
-    fun `특강 신청에 성공하면 true 를 반환한다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-        val user = User("변주환")
-        val lectureAttendee = LectureAttendee(user, lecture)
-
-        `when`(userRepository.findById(userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(lectureId)).thenReturn(lecture)
-        `when`(lectureAttendeeRepository.findByUserAndLecture(user, lecture)).thenReturn(lectureAttendee)
-        val isRegistered = lectureStatusService.isLectureRegistered(userId, lectureId)
-
-        assertThat(isRegistered).isTrue()
-    }
-
-    @Test
-    fun `특강 신청에 실패하면 false 를 반환한다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-        val user = User("변주환")
-
-        `when`(userRepository.findById(userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(lectureId)).thenReturn(lecture)
-        `when`(lectureAttendeeRepository.findByUserAndLecture(user, lecture)).thenReturn(null)
-        val isRegistered = lectureStatusService.isLectureRegistered(userId, lectureId)
-
-        assertThat(isRegistered).isFalse()
-    }
+    @Test 
+    fun `특강 신청에 성공하면 true 를 반환한다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+        val user = User("변주환") 
+        val lectureAttendee = LectureAttendee(user, lecture) 
+ 
+        `when`(userRepository.findById(userId)).thenReturn(user) 
+        `when`(lectureRepository.findById(lectureId)).thenReturn(lecture) 
+        `when`(lectureAttendeeRepository.findByUserAndLecture(user, lecture)).thenReturn(lectureAttendee) 
+        val isRegistered = lectureStatusService.isLectureRegistered(userId, lectureId) 
+ 
+        assertThat(isRegistered).isTrue() 
+    } 
+ 
+    @Test 
+    fun `특강 신청에 실패하면 false 를 반환한다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+        val user = User("변주환") 
+ 
+        `when`(userRepository.findById(userId)).thenReturn(user) 
+        `when`(lectureRepository.findById(lectureId)).thenReturn(lecture) 
+        `when`(lectureAttendeeRepository.findByUserAndLecture(user, lecture)).thenReturn(null) 
+        val isRegistered = lectureStatusService.isLectureRegistered(userId, lectureId) 
+ 
+        assertThat(isRegistered).isFalse() 
+    } 
 }

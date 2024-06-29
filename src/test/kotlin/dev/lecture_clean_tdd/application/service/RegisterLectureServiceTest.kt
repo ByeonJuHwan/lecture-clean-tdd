@@ -44,158 +44,158 @@ class RegisterLectureServiceTest {
 
     @InjectMocks
     lateinit var registerLectureService: RegisterLectureService
+ 
+    @Test 
+    fun `특강을 신청하면 성공한다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+ 
+        val user = User("변주환") 
+ 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture) 
+ 
+        val result = registerLectureService.registerLecture(request.toDto()) 
+ 
+        assertThat(result).isTrue() 
+    } 
+ 
+    @Test 
+    fun `특강 신청시 유효하지 않은 회원이면 UseNotFoundException 을 발생시킨다`() { 
+        val userId = -1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        assertThatThrownBy { 
+            registerLectureService.registerLecture(request.toDto()) 
+        }.isInstanceOf(UserNotFoundException::class.java) 
+    } 
+ 
+    @Test 
+    fun `특강 신청시 유효하지 않은 강의이면 LectureNotFoundException 을 발생시킨다`() { 
+        val userId = 1L 
+        val lectureId = -100L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val user = User("변주환") 
+ 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+ 
+        assertThatThrownBy { 
+            registerLectureService.registerLecture(request.toDto()) 
+        }.isInstanceOf(LectureNotFoundException::class.java) 
+    } 
 
-    @Test
-    fun `특강을 신청하면 성공한다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
+    @Test 
+    fun `특강신청이 성공하면 특강의 currentAttendees 가 1 증가한다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+        val user = User("변주환") 
+ 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture) 
+ 
+        registerLectureService.registerLecture(request.toDto()) 
+ 
+        assertThat(lecture.currentAttendees).isEqualTo(1) 
+    } 
+ 
+    @Test 
+    fun `특강인원이 30명이상이면 MaxAttendeesReachedException 이 발생한다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+        val user = User("변주환") 
+ 
+        lecture.currentAttendees = 30 
+ 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture) 
+ 
+        assertThatThrownBy { 
+            registerLectureService.registerLecture(request.toDto()) 
+        }.isInstanceOf(MaxAttendeesReachedException::class.java) 
+    } 
+ 
+    @Test 
+    fun `동일한 userId 로 신청이력을 검색하여 동일한 특강을 신청하면 DuplicateLectureRegistrationException 이 발생한다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+        val user = User("변주환") 
+        val lectureAttendee = LectureAttendee(user,lecture) 
+ 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture) 
+        `when`(lectureAttendeeRepository.findByUserAndLecture(user,lecture)).thenReturn(lectureAttendee) 
+ 
+        assertThatThrownBy { 
+            registerLectureService.registerLecture(request.toDto()) 
+        }.isInstanceOf(DuplicateLectureRegistrationException::class.java) 
+            .hasMessage("이미 이 강의에 신청하셨습니다") 
+    } 
 
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-
-        val user = User("변주환")
-
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
-
-        val result = registerLectureService.registerLecture(request.toDto())
-
-        assertThat(result).isTrue()
-    }
-
-    @Test
-    fun `특강 신청시 유효하지 않은 회원이면 UseNotFoundException 을 발생시킨다`() {
-        val userId = -1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
-
-        assertThatThrownBy {
-            registerLectureService.registerLecture(request.toDto())
-        }.isInstanceOf(UserNotFoundException::class.java)
-    }
-
-    @Test
-    fun `특강 신청시 유효하지 않은 강의이면 LectureNotFoundException 을 발생시킨다`() {
-        val userId = 1L
-        val lectureId = -100L
-        val request = LectureRequest(userId, lectureId)
-
-        val user = User("변주환")
-
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-
-        assertThatThrownBy {
-            registerLectureService.registerLecture(request.toDto())
-        }.isInstanceOf(LectureNotFoundException::class.java)
-    }
-
-    @Test
-    fun `특강신청이 성공하면 특강의 currentAttendees 가 1 증가한다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
-
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-        val user = User("변주환")
-
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
-
-        registerLectureService.registerLecture(request.toDto())
-
-        assertThat(lecture.currentAttendees).isEqualTo(1)
-    }
-
-    @Test
-    fun `특강인원이 30명이상이면 MaxAttendeesReachedException 이 발생한다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
-
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-        val user = User("변주환")
-
-        lecture.currentAttendees = 30
-
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
-
-        assertThatThrownBy {
-            registerLectureService.registerLecture(request.toDto())
-        }.isInstanceOf(MaxAttendeesReachedException::class.java)
-    }
-
-    @Test
-    fun `동일한 userId 로 신청이력을 검색하여 동일한 특강을 신청하면 DuplicateLectureRegistrationException 이 발생한다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
-
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-        val user = User("변주환")
-        val lectureAttendee = LectureAttendee(user,lecture)
-
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
-        `when`(lectureAttendeeRepository.findByUserAndLecture(user,lecture)).thenReturn(lectureAttendee)
-
-        assertThatThrownBy {
-            registerLectureService.registerLecture(request.toDto())
-        }.isInstanceOf(DuplicateLectureRegistrationException::class.java)
-            .hasMessage("이미 이 강의에 신청하셨습니다")
-    }
-
-    @Test
-    fun `특강 신청 시각보다 먼저 신청시 EarlyLectureRegistrationException 을 발생 시킨다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
-
-        val lecture = Lecture("테스트", "2025-01-24 21:00", "2026-12-31 13:00", "2027-01-01 13:00")
-        val user = User("변주환")
-
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
-
-        assertThatThrownBy {
-            registerLectureService.registerLecture(request.toDto())
-        }.isInstanceOf(EarlyLectureRegistrationException::class.java)
-    }
-
-    @Test
-    fun `특강 신청 종료일보다 늦게 신청시 LateLectureRegistrationException 을 발생 시킨다`() {
-        val userId = 1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
-
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-04-10 15:00", "2025-01-01 13:00")
-        val user = User("변주환")
-
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
-
-        assertThatThrownBy {
-            registerLectureService.registerLecture(request.toDto())
-        }.isInstanceOf(LateLectureRegistrationException::class.java)
-    }
-
-    @Test
-    fun `특강 신청시 어떤 유저가 신청했는지 History 를 저장하는 이벤트가 발행된다`() {
-        // given
-        val userId = 1L
-        val lectureId = 1L
-        val request = LectureRequest(userId, lectureId)
-
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 15:00", "2025-01-01 13:00")
-        val user = User("변주환")
-
-        // when
-        `when`(userRepository.findById(request.userId)).thenReturn(user)
-        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture)
-
-        registerLectureService.registerLecture(request.toDto())
-
-        //then
-        verify(eventPublisher, times(1)).publishEvent(any(LectureHistoryEvent::class.java))
-    }
-}
+    @Test 
+    fun `특강 신청 시각보다 먼저 신청시 EarlyLectureRegistrationException 을 발생 시킨다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val lecture = Lecture("테스트", "2025-01-24 21:00", "2026-12-31 13:00", "2027-01-01 13:00") 
+        val user = User("변주환") 
+ 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture) 
+ 
+        assertThatThrownBy { 
+            registerLectureService.registerLecture(request.toDto()) 
+        }.isInstanceOf(EarlyLectureRegistrationException::class.java) 
+    } 
+ 
+    @Test 
+    fun `특강 신청 종료일보다 늦게 신청시 LateLectureRegistrationException 을 발생 시킨다`() { 
+        val userId = 1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-04-10 15:00", "2025-01-01 13:00") 
+        val user = User("변주환") 
+ 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture) 
+ 
+        assertThatThrownBy { 
+            registerLectureService.registerLecture(request.toDto()) 
+        }.isInstanceOf(LateLectureRegistrationException::class.java) 
+    } 
+ 
+    @Test 
+    fun `특강 신청시 어떤 유저가 신청했는지 History 를 저장하는 이벤트가 발행된다`() { 
+        // given 
+        val userId = 1L 
+        val lectureId = 1L 
+        val request = LectureRequest(userId, lectureId) 
+ 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 15:00", "2025-01-01 13:00") 
+        val user = User("변주환") 
+ 
+        // when 
+        `when`(userRepository.findById(request.userId)).thenReturn(user) 
+        `when`(lectureRepository.findByIdWithLock(request.lectureId)).thenReturn(lecture) 
+ 
+        registerLectureService.registerLecture(request.toDto()) 
+ 
+        //then 
+        verify(eventPublisher, times(1)).publishEvent(any(LectureHistoryEvent::class.java)) 
+    } 
+} 
