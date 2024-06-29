@@ -20,65 +20,65 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-@Service
-class RegisterLectureService(
-    private val lectureRepository: LectureRepository,
-    private val userRepository : UserRepository,
-    private val lectureAttendeeRepository: LectureAttendeeRepository,
-    private val eventPublisher: ApplicationEventPublisher,
-) : RegisterLectureUseCase{
-
-    @Transactional
-    override fun registerLecture(request: LectureRegistryDto): Boolean {
-        val user = getUser(request.userId)
-        val lecture = getLecture(request.lectureId)
-
-        saveLectureApplicationHistory(user, lecture)
-        checkIfLectureIsFull(lecture)
-        validateLectureRegistrationDate(lecture.registrationStartDate, lecture.registrationEndDate)
-        ensureUniqueRegistration(user,lecture)
-
-        lecture.increaseCurrentAttendee()
-        lectureAttendeeRepository.save(LectureAttendee(user, lecture))
-        return true
-    }
-
-    private fun getUser(userId: Long): User {
-        return userRepository.findById(userId) ?: throw UserNotFoundException("유저를 찾을 수 없습니다")
-    }
+@Service 
+class RegisterLectureService( 
+    private val lectureRepository: LectureRepository, 
+    private val userRepository : UserRepository, 
+    private val lectureAttendeeRepository: LectureAttendeeRepository, 
+    private val eventPublisher: ApplicationEventPublisher, 
+) : RegisterLectureUseCase{ 
+ 
+    @Transactional 
+    override fun registerLecture(request: LectureRegistryDto): Boolean { 
+        val user = getUser(request.userId) 
+        val lecture = getLecture(request.lectureId) 
+ 
+        saveLectureApplicationHistory(user, lecture) 
+        checkIfLectureIsFull(lecture) 
+        validateLectureRegistrationDate(lecture.registrationStartDate, lecture.registrationEndDate) 
+        ensureUniqueRegistration(user,lecture) 
+ 
+        lecture.increaseCurrentAttendee() 
+        lectureAttendeeRepository.save(LectureAttendee(user, lecture)) 
+        return true 
+    } 
+ 
+    private fun getUser(userId: Long): User { 
+        return userRepository.findById(userId) ?: throw UserNotFoundException("유저를 찾을 수 없습니다") 
+    } 
 
     private fun getLecture(lectureId: Long): Lecture { 
         return lectureRepository.findByIdWithLock(lectureId) ?: throw LectureNotFoundException("강의를 찾을 수 없습니다") 
     } 
+ 
+    private fun ensureUniqueRegistration(user: User, lecture: Lecture) { 
+        lectureAttendeeRepository.findByUserAndLecture(user, lecture)?.let { 
+            throw DuplicateLectureRegistrationException("이미 이 강의에 신청하셨습니다") 
+        } 
+    } 
+ 
+    /** 
+     * 비동기로 처리해서 아래 로직에서 예외가 발생해도 rollback 이 되자 않고 history 는 저장되도록 처리 
+     * 비동기 같은 경우 스프링 AOP 를 사용해서 private 메소드에는 접근이 불가능하므로 접근제한자를 변경 
+     */ 
+    protected fun saveLectureApplicationHistory(user: User, lecture: Lecture) { 
+        eventPublisher.publishEvent(LectureHistoryEvent(user, lecture)) 
+    } 
+ 
+    private fun validateLectureRegistrationDate(registrationStartDate: String, registrationEndDate: String) { 
+        val currentTime = DateTimeUtil.getCurrentTimeFormatted() 
+ 
+        if (DateTimeUtil.isBefore(currentTime, registrationStartDate)) { 
+            throw EarlyLectureRegistrationException("아직 특강 신청 시작일이 아닙니다") 
+        } else if (DateTimeUtil.isAfter(currentTime, registrationEndDate)) { 
+            throw LateLectureRegistrationException("특강 신청 종료일이 지났습니다") 
+        } 
+    } 
 
-    private fun ensureUniqueRegistration(user: User, lecture: Lecture) {
-        lectureAttendeeRepository.findByUserAndLecture(user, lecture)?.let {
-            throw DuplicateLectureRegistrationException("이미 이 강의에 신청하셨습니다")
-        }
-    }
-
-    /**
-     * 비동기로 처리해서 아래 로직에서 예외가 발생해도 rollback 이 되자 않고 history 는 저장되도록 처리
-     * 비동기 같은 경우 스프링 AOP 를 사용해서 private 메소드에는 접근이 불가능하므로 접근제한자를 변경
-     */
-    protected fun saveLectureApplicationHistory(user: User, lecture: Lecture) {
-        eventPublisher.publishEvent(LectureHistoryEvent(user, lecture))
-    }
-
-    private fun validateLectureRegistrationDate(registrationStartDate: String, registrationEndDate: String) {
-        val currentTime = DateTimeUtil.getCurrentTimeFormatted()
-
-        if (DateTimeUtil.isBefore(currentTime, registrationStartDate)) {
-            throw EarlyLectureRegistrationException("아직 특강 신청 시작일이 아닙니다")
-        } else if (DateTimeUtil.isAfter(currentTime, registrationEndDate)) {
-            throw LateLectureRegistrationException("특강 신청 종료일이 지났습니다")
-        }
-    }
-
-
-    private fun checkIfLectureIsFull(lecture: Lecture) {
-        if (lecture.currentAttendees >= lecture.maxAttendees) {
-            throw MaxAttendeesReachedException("강의 정원이 초과되었습니다")
-        }
-    }
-}
+ 
+    private fun checkIfLectureIsFull(lecture: Lecture) { 
+        if (lecture.currentAttendees >= lecture.maxAttendees) { 
+            throw MaxAttendeesReachedException("강의 정원이 초과되었습니다") 
+        } 
+    } 
+} 
