@@ -22,18 +22,18 @@ class GetLecturesServiceTest {
     @InjectMocks
     private lateinit var getLectureService: GetLecturesService
 
-    @Test
-    fun `저장되어 있는 모든 특강의 리스트를 가져온다`() {
-        // given
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-        val lectures = listOf(lecture)
-
-        // when
-        `when`(lectureRepository.findAll()).thenReturn(lectures)
-        val allLectures = getLectureService.getAllLectures()
-
-        //then
-        assertThat(allLectures.size).isEqualTo(1)
-        assertThat(allLectures[0].title).isEqualTo("테스트")
-    }
-}
+    @Test 
+    fun `저장되어 있는 모든 특강의 리스트를 가져온다`() { 
+        // given 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+        val lectures = listOf(lecture) 
+ 
+        // when 
+        `when`(lectureRepository.findAll()).thenReturn(lectures) 
+        val allLectures = getLectureService.getAllLectures() 
+ 
+        //then 
+        assertThat(allLectures.size).isEqualTo(1) 
+        assertThat(allLectures[0].title).isEqualTo("테스트") 
+    } 
+} 
