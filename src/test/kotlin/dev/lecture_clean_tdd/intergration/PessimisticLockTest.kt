@@ -46,18 +46,18 @@ class PessimisticLockTest {
     private lateinit var registerLectureService: RegisterLectureService
 
 
-    @BeforeEach
-    fun setUp() {
-        // 테스트 강의 생성
-        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00")
-        lectureRepository.save(lecture)
-
-        // 100명의 테스트 사용자 생성
-        (1..100).forEach {
-            userRepository.save(User(name = "Test User $it"))
-        }
-    }
-
+    @BeforeEach 
+    fun setUp() { 
+        // 테스트 강의 생성 
+        val lecture = Lecture("테스트", "2024-04-10 13:00", "2024-12-31 13:00", "2025-01-01 13:00") 
+        lectureRepository.save(lecture) 
+ 
+        // 100명의 테스트 사용자 생성 
+        (1..100).forEach { 
+            userRepository.save(User(name = "Test User $it")) 
+        } 
+    } 
+ 
 
     @Test
     fun `1개의 수강신청 요청이 들어왔을때 정상적으로 정원이 1명 증가하는지 확인`() {
@@ -97,95 +97,95 @@ class PessimisticLockTest {
     }
 
     @Test
-    fun `100명이 동시에 신청을 했을 경우 30명만 신청이 가능하다`() {
-        // given
-        val threadCount = 100
-        val executorService = Executors.newFixedThreadPool(32)
-        val latch = CountDownLatch(threadCount)
-        val lectureId = 1L
-        val users = jpaUserRepository.findAll()
+    fun `100명이 동시에 신청을 했을 경우 30명만 신청이 가능하다`() { 
+        // given 
+        val threadCount = 100 
+        val executorService = Executors.newFixedThreadPool(32) 
+        val latch = CountDownLatch(threadCount) 
+        val lectureId = 1L 
+        val users = jpaUserRepository.findAll() 
+ 
+        // when 
+        for (i in 0 until threadCount) { 
+            executorService.submit { 
+                try { 
+                    val request = LectureRequest(users[i].id, lectureId) 
+                    registerLectureService.registerLecture(request.toDto()) 
+                } finally { 
+                    latch.countDown() 
+                } 
+            } 
+        } 
+ 
+        latch.await() 
+        executorService.shutdown() 
 
-        // when
-        for (i in 0 until threadCount) {
-            executorService.submit {
-                try {
-                    val request = LectureRequest(users[i].id, lectureId)
-                    registerLectureService.registerLecture(request.toDto())
-                } finally {
-                    latch.countDown()
-                }
-            }
-        }
+        // then 
+        val result = jpaLectureRepository.findById(1L) 
+        assertThat(result.get().currentAttendees).isEqualTo(30) 
+    } 
 
-        latch.await()
-        executorService.shutdown()
+    @Test 
+    fun `100명이 동시에 신청을 했을 경우 30명의 성공이력이 쌓여야한다`() { 
+        // given 
+        val threadCount = 100 
+        val executorService = Executors.newFixedThreadPool(32) 
+        val latch = CountDownLatch(threadCount) 
+        val lectureId = 1L 
+        val users = jpaUserRepository.findAll() 
+ 
+        for (i in 0 until threadCount) { 
+            executorService.submit { 
+                try { 
+                    val request = LectureRequest(users[i].id, lectureId) 
+                    registerLectureService.registerLecture(request.toDto()) 
+                } finally { 
+                    latch.countDown() 
+                } 
+            } 
+        } 
+ 
+        latch.await() 
+        executorService.shutdown() 
+ 
+        // when 
+        val lecture = lectureRepository.findById(lectureId) ?: throw LectureNotFoundException("강의가 없습니다") 
+        val lectureAttendees = lectureAttendeeRepository.countByLecture(lecture) 
+ 
+        // then 
+        assertThat(lectureAttendees).isEqualTo(30) 
+    } 
 
-        // then
-        val result = jpaLectureRepository.findById(1L)
-        assertThat(result.get().currentAttendees).isEqualTo(30)
-    }
-
-    @Test
-    fun `100명이 동시에 신청을 했을 경우 30명의 성공이력이 쌓여야한다`() {
-        // given
-        val threadCount = 100
-        val executorService = Executors.newFixedThreadPool(32)
-        val latch = CountDownLatch(threadCount)
-        val lectureId = 1L
-        val users = jpaUserRepository.findAll()
-
-        for (i in 0 until threadCount) {
-            executorService.submit {
-                try {
-                    val request = LectureRequest(users[i].id, lectureId)
-                    registerLectureService.registerLecture(request.toDto())
-                } finally {
-                    latch.countDown()
-                }
-            }
-        }
-
-        latch.await()
-        executorService.shutdown()
-
-        // when
-        val lecture = lectureRepository.findById(lectureId) ?: throw LectureNotFoundException("강의가 없습니다")
-        val lectureAttendees = lectureAttendeeRepository.countByLecture(lecture)
-
-        // then
-        assertThat(lectureAttendees).isEqualTo(30)
-    }
-
-    @Test
-    fun `동시에 100명이 요청했을때 100명의 history가 쌓이고 30명만 신청에 성공한다`() {
-        // given
-        val threadCount = 100
-        val executorService = Executors.newFixedThreadPool(32)
-        val latch = CountDownLatch(threadCount)
-        val lectureId = 1L
-        val users = jpaUserRepository.findAll()
-
-        for (i in 0 until threadCount) {
-            executorService.submit {
-                try {
-                    val request = LectureRequest(users[i].id, lectureId)
-                    registerLectureService.registerLecture(request.toDto())
-                } finally {
-                    latch.countDown()
-                }
-            }
-        }
-
-        latch.await()
-        executorService.shutdown()
-
-        // when
-        val lecture = lectureRepository.findById(lectureId) ?: throw LectureNotFoundException("강의가 없습니다")
-        val lectureAttendees = lectureAttendeeRepository.countByLecture(lecture)
-        val lectureHistories = lectureHistoryRepository.countByLecture(lecture)
-
-        // then
-        assertThat(lectureAttendees).isEqualTo(30)
-        assertThat(lectureHistories).isEqualTo(100)
-    }
+    @Test 
+    fun `동시에 100명이 요청했을때 100명의 history가 쌓이고 30명만 신청에 성공한다`() { 
+        // given 
+        val threadCount = 100 
+        val executorService = Executors.newFixedThreadPool(32) 
+        val latch = CountDownLatch(threadCount) 
+        val lectureId = 1L 
+        val users = jpaUserRepository.findAll() 
+ 
+        for (i in 0 until threadCount) { 
+            executorService.submit { 
+                try { 
+                    val request = LectureRequest(users[i].id, lectureId) 
+                    registerLectureService.registerLecture(request.toDto()) 
+                } finally { 
+                    latch.countDown() 
+                } 
+            } 
+        } 
+ 
+        latch.await() 
+        executorService.shutdown() 
+ 
+        // when 
+        val lecture = lectureRepository.findById(lectureId) ?: throw LectureNotFoundException("강의가 없습니다") 
+        val lectureAttendees = lectureAttendeeRepository.countByLecture(lecture) 
+        val lectureHistories = lectureHistoryRepository.countByLecture(lecture) 
+ 
+        // then 
+        assertThat(lectureAttendees).isEqualTo(30) 
+        assertThat(lectureHistories).isEqualTo(100) 
+    } 
 }

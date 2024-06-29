@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
-interface JpaLectureRepository : JpaRepository<Lecture, Long>  {
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select l from Lecture l where l.id = :lectureId")
-    fun findByIdWithLock(lectureId: Long) : Lecture
-}
+interface JpaLectureRepository : JpaRepository<Lecture, Long>  { 
+ 
+    @Lock(LockModeType.PESSIMISTIC_WRITE) 
+    @Query("select l from Lecture l where l.id = :lectureId") 
+    fun findByIdWithLock(lectureId: Long) : Lecture 
+} 
