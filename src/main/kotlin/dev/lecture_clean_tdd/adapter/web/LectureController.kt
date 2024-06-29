@@ -34,7 +34,6 @@ class LectureController(
     @GetMapping("/lectures")
     fun getLectures() :  ResponseEntity<LectureListResponse>{
         return ResponseEntity.ok(LectureListResponse(getLecturesUseCase.getAllLectures()))
-    }
 
     @GetMapping("/lectures/{lectureId}/applications/{userId}")
     fun checkLectureApplicationStatus(
