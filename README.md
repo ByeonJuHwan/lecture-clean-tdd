@@ -1,4 +1,5 @@
 # lecture-clean-tdd
 
-# ERD
-![스크린샷 2024-06-27 오후 10 28 38](https://github.com/ByeonJuHwan/lecture-clean-tdd/assets/105885581/c6a63df9-40f4-432f-98b1-47693c65bac4)
+# 특강신청 API ERD
+
+![스크린샷 2024-06-27 오후 10 28 38](https://github.com/ByeonJuHwan/lecture-clean-tdd/assets/105885581/5a51a62f-8281-40d4-830d-7e2a0de8c6a3)
