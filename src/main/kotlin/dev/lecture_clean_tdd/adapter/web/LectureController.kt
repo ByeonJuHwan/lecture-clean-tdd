@@ -23,24 +23,23 @@ class LectureController(
 ){
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
-
-    @PostMapping("/lectures/apply")
-    fun registerLecture(
-        @RequestBody request: LectureRequest,
-    ): ResponseEntity<Boolean> {
-        return ResponseEntity.ok(registerLectureUseCase.registerLecture(request.toDto()))
-    }
+ 
+    @PostMapping("/lectures/apply") 
+    fun registerLecture( 
+        @RequestBody request: LectureRequest, 
+    ): ResponseEntity<Boolean> { 
+        return ResponseEntity.ok(registerLectureUseCase.registerLecture(request.toDto())) 
+    } 
 
     @GetMapping("/lectures")
     fun getLectures() :  ResponseEntity<LectureListResponse>{
         return ResponseEntity.ok(LectureListResponse(getLecturesUseCase.getAllLectures()))
+
+    @GetMapping("/lectures/{lectureId}/applications/{userId}")
+    fun checkLectureApplicationStatus(
+        @PathVariable lectureId: Long,
+        @PathVariable userId: Long
+    ): ResponseEntity<Boolean> {
+        return ResponseEntity.ok(lectureStatusUseCase.isLectureRegistered(userId, lectureId))
     }
- 
-    @GetMapping("/lectures/{lectureId}/applications/{userId}") 
-    fun checkLectureApplicationStatus( 
-        @PathVariable lectureId: Long, 
-        @PathVariable userId: Long 
-    ): ResponseEntity<Boolean> { 
-        return ResponseEntity.ok(lectureStatusUseCase.isLectureRegistered(userId, lectureId)) 
-    } 
 }

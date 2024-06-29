@@ -31,8 +31,8 @@ class Lecture(
     val maxAttendees: Int = 30
 
     var currentAttendees: Int = 0
-
-    fun increaseCurrentAttendee() {
-        this.currentAttendees++
-    }
+ 
+    fun increaseCurrentAttendee() { 
+        this.currentAttendees++ 
+    } 
 }
